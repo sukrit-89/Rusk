@@ -24,7 +24,6 @@ import {
   LogOut,
   Menu,
   Network,
-  PenTool,
   Scale,
   ScanText,
   Search,
@@ -217,6 +216,14 @@ function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) => 
   );
 }
 
+function RuskBrandLogo({ className }: { className?: string }) {
+  return (
+    <Link className={cn("brand-logo-link", className)} href="/" aria-label="Rusk AI home">
+      <img src="/rusk-logo-mark.png" alt="Rusk AI" />
+    </Link>
+  );
+}
+
 function formatAnswerBlocks(content: string): AnswerBlock[] {
   return content
     .split(/\r?\n/)
@@ -288,10 +295,7 @@ export function LandingPage() {
     <div className="paper-shell landing-shell">
       <FontStyles />
       <header className="landing-nav">
-        <div className="brand-row landing-brand">
-          <PenTool className="brand-icon" />
-          <h1>Rusk AI</h1>
-        </div>
+        <RuskBrandLogo className="landing-brand" />
         <nav className="landing-nav-links" aria-label="Landing sections">
           <a href="#workflow">Workflow</a>
           <a href="#modes">Modes</a>
@@ -445,10 +449,7 @@ export function LandingPage() {
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="footer-brand-block">
-            <div className="brand-row landing-brand">
-              <PenTool className="brand-icon" />
-              <h1>Rusk AI</h1>
-            </div>
+            <RuskBrandLogo className="landing-brand" />
             <p>
               Offline multimodal RAG for private corpora, with cited answers, Supabase-authenticated workspaces, and a NearAI TEE deployment path.
             </p>
@@ -589,10 +590,7 @@ export function AuthScreen() {
       <FontStyles />
       <SketchBox className="login-card" hover={false}>
         <div className="tape" />
-        <div className="brand-row login-brand">
-          <PenTool className="brand-icon" />
-          <h1>Rusk AI</h1>
-        </div>
+        <RuskBrandLogo className="login-brand" />
         <h2>Sign in to your secure workspace</h2>
         <p>{status}</p>
 
@@ -723,10 +721,7 @@ export function ChatWorkspace() {
       <div className="paper-shell login-shell">
         <FontStyles />
         <SketchBox className="login-card" hover={false}>
-          <div className="brand-row login-brand">
-            <PenTool className="brand-icon" />
-            <h1>Rusk AI</h1>
-          </div>
+          <RuskBrandLogo className="login-brand" />
           <h2>Checking workspace access</h2>
           <p>Verifying your Supabase session before opening the RAG console.</p>
         </SketchBox>
@@ -884,10 +879,7 @@ export function ChatWorkspace() {
 
       <div className="paper-layout">
         <aside className="paper-sidebar">
-          <div className="brand-row">
-            <PenTool className="brand-icon" />
-            <h1>Rusk AI</h1>
-          </div>
+          <RuskBrandLogo />
 
           <nav className="sidebar-nav">
             {menuItems.map((item) => {

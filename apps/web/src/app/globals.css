@@ -81,10 +81,6 @@ input:disabled {
   max-width: 1180px;
 }
 
-.landing-brand {
-  margin-bottom: 0;
-}
-
 .landing-actions {
   align-items: center;
   display: flex;
@@ -572,10 +568,6 @@ input:disabled {
   width: min(100%, 480px);
 }
 
-.login-brand {
-  margin-bottom: 24px;
-}
-
 .login-card h2 {
   font-size: 36px;
   line-height: 1.05;
@@ -645,25 +637,43 @@ input:disabled {
   width: 256px;
 }
 
-.brand-row {
+.brand-logo-link {
   align-items: center;
+  background: rgb(255 255 255 / 0.75);
+  border: 2px solid #27272a;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.16);
   display: flex;
-  gap: 8px;
+  height: 74px;
+  justify-content: center;
   margin-bottom: 40px;
+  overflow: hidden;
+  padding: 4px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 128px;
 }
 
-.brand-row h1 {
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  margin: 0;
+.brand-logo-link:hover {
+  box-shadow: 4px 4px 0 rgb(0 0 0 / 0.22);
+  transform: translateY(-2px) rotate(-1deg);
 }
 
-.brand-icon {
-  color: #4f46e5;
-  height: 32px;
-  transform: rotate(12deg);
-  width: 32px;
+.brand-logo-link img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.landing-brand {
+  margin-bottom: 0;
+}
+
+.login-brand {
+  height: 90px;
+  margin-bottom: 24px;
+  width: 160px;
 }
 
 .sidebar-nav {
@@ -1676,6 +1686,10 @@ input:disabled {
   .landing-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .landing-shell {
+    padding: 24px 16px;
   }
 
   .landing-section {
