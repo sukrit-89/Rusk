@@ -1,0 +1,24 @@
+spec:
+  runtime: confidential-compute
+  provider: near.ai
+  resources:
+    cpu: 8
+    memory: 32Gi
+    storage: 100Gi
+  enclave:
+    image: offline-rag-tee:latest
+    measurement: "sha256:replace-with-enclave-measurement"
+  sealed_storage:
+    - key_id: vector_keys
+      purpose: vector-index-encryption
+    - key_id: signing_key
+      purpose: attestation-signing
+  attestation:
+    enabled: true
+    provider: near.ai
+    certificate_ttl: 24h
+  networking:
+    ingress:
+      - port: 3000
+      - port: 8000
+    egress: none

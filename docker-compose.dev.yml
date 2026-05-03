@@ -1,0 +1,77 @@
+name: rusk-ai
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: rag
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://rag:rag@postgres:5432/rag
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: mistral
+      LLAVA_MODEL: llava
+      LOCAL_API_KEY: local-dev-key
+      TEE_MODE: ${TEE_MODE:-none}
+      NEARAI_ATTESTATION_URL: ${NEARAI_ATTESTATION_URL:-}
+      NEARAI_VERIFY_URL: ${NEARAI_VERIFY_URL:-}
+      SEALED_STORAGE_DIR: /app/sealed
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      REQUIRE_SUPABASE_JWT: ${REQUIRE_SUPABASE_JWT:-false}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api/app:/app/app:ro
+      - ./uploads:/app/uploads
+      - ./sealed:/app/sealed
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      INTERNAL_API_BASE_URL: http://api:8000
+      LOCAL_API_KEY: local-dev-key
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ./apps/web/src:/app/apps/web/src:ro
+      - ./apps/web/next.config.ts:/app/apps/web/next.config.ts:ro
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
+  ollama-models:

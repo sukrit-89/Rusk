@@ -1,0 +1,15 @@
+{
+  "name": "rusk-ai",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "lint:web": "npm --workspace apps/web run lint",
+    "dev:api": "uvicorn app.main:app --reload --app-dir services/api --host 0.0.0.0 --port 8000",
+    "test:api": "pytest services/api/tests"
+  }
+}
