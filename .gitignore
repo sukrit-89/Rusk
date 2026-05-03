@@ -18,3 +18,5 @@ uploads/
 sealed/
 artifacts/
 attestation_*.json
+IMPLEMENTATION_STATUS.md
+PRD_Offline_Multimodal_RAG_TEE_Assistant.md
