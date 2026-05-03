@@ -639,23 +639,18 @@ input:disabled {
 
 .brand-logo-link {
   align-items: center;
-  background: rgb(255 255 255 / 0.75);
-  border: 2px solid #27272a;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.16);
   display: flex;
-  height: 74px;
+  height: 82px;
   justify-content: center;
   margin-bottom: 40px;
   overflow: hidden;
-  padding: 4px;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  width: 128px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  width: 148px;
 }
 
 .brand-logo-link:hover {
-  box-shadow: 4px 4px 0 rgb(0 0 0 / 0.22);
+  opacity: 0.86;
   transform: translateY(-2px) rotate(-1deg);
 }
 
@@ -671,9 +666,9 @@ input:disabled {
 }
 
 .login-brand {
-  height: 90px;
+  height: 102px;
   margin-bottom: 24px;
-  width: 160px;
+  width: 184px;
 }
 
 .sidebar-nav {

@@ -219,7 +219,7 @@ function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (mode: Mode) => 
 function RuskBrandLogo({ className }: { className?: string }) {
   return (
     <Link className={cn("brand-logo-link", className)} href="/" aria-label="Rusk AI home">
-      <img src="/rusk-logo-mark.png" alt="Rusk AI" />
+      <img src="/Rusklogo-Photoroom.png" alt="Rusk AI" />
     </Link>
   );
 }
