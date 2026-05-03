@@ -1,67 +1,180 @@
 # Rusk AI
 
-Production-oriented rebuild for the PRD in this repository. The old prototype was removed; the project is now shaped around:
+<p align="center">
+  <img src="docs/assets/RuskAI.png" alt="Rusk AI trusted document intelligence logo" width="520" />
+</p>
 
-- Next.js App Router chatbot UI in `apps/web`
-- FastAPI RAG service in `services/api`
-- Supabase authentication in the web app
-- Postgres + pgvector storage in `infra/postgres`
-- Ollama-first local inference with a hosted fallback boundary
-- NearAI TEE deployment path kept explicit instead of simulated as production security
+Rusk AI is a private, multimodal RAG assistant designed around one core promise: answers should be useful, cited, and verifiable. It combines a production web workspace with a Python RAG backend, pgvector retrieval, Supabase authentication, and a trusted execution layer that can attach attestable receipts to generated answers.
+
+The project is intentionally built as a real application rather than a prototype panel: Next.js for the product UI, FastAPI for retrieval and model orchestration, Postgres/pgvector for evidence storage, and a NearAI/Phala-style TEE deployment path for verifiable execution.
+
+## Trusted Execution Layer
+
+The trusted execution layer is the center of Rusk AI. Every answer can carry an attestation receipt that binds together:
+
+- the generated response hash
+- the citation set hash
+- the selected model name and model hash
+- the active TEE mode
+- the attestation provider
+- a signature and certificate payload
+
+In local development, Rusk AI uses a sealed HMAC key stored outside source control so the receipt flow can be tested end to end. In production, `TEE_MODE=nearai` is designed to fail closed unless real attestation and verification endpoints are configured.
+
+Required production-facing variables:
+
+```env
+TEE_MODE=nearai
+NEARAI_ATTESTATION_URL=https://your-attestation-service/attest
+NEARAI_VERIFY_URL=https://your-attestation-service/verify
+SEALED_STORAGE_DIR=/secure/sealed
+```
+
+This keeps development honest: local receipts are useful for workflow testing, but Rusk AI should only claim hardware-backed trusted execution once the deployed attestation service is connected.
+
+## Product Capabilities
+
+- Authenticated web workspace with Supabase sign-in/sign-up
+- Landing, auth, and workspace routes built with Next.js App Router
+- Text, PDF, and image ingestion
+- OCR and LLaVA-ready image captioning path
+- Async ingestion jobs with status polling
+- pgvector-backed retrieval with citation metadata
+- Ollama-first local generation with hosted LLM fallback support
+- Answer receipts and `/verify` endpoint for attestation validation
+- Medical, legal, and enterprise retrieval modes
+- GraphRAG-ready architecture without forcing graph complexity into V1
+
+## Architecture
+
+```text
+apps/web
+  Next.js App Router UI, auth pages, workspace, API proxy routes
+
+services/api
+  FastAPI backend for ingestion, retrieval, generation, receipts, and verification
+
+infra/postgres
+  pgvector schema for collections, documents, chunks, and attestation receipts
+
+nearai.deployment.yaml
+  NearAI deployment shape for web/API services
+```
+
+Request flow:
+
+```text
+Browser -> Next.js route handler -> FastAPI -> pgvector retrieval -> LLM -> attestation receipt -> UI
+```
 
 ## Local Development
 
-1. Copy `.env.example` to `.env` and adjust secrets.
-2. Start Postgres, Ollama, API, and web:
+Copy the example environment and fill in secrets:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Start the stack:
 
 ```powershell
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-3. Add Supabase public auth env values:
+Default local services:
 
-```powershell
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```text
+Web: http://localhost:3000
+API: http://localhost:8000
+Postgres: localhost:5432
+Ollama: http://localhost:11434
 ```
 
-4. Pull a local model once:
+If port `3000` is busy:
+
+```powershell
+$env:WEB_PORT=3001
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Pull a local model:
 
 ```powershell
 docker compose -f docker-compose.dev.yml exec ollama ollama pull mistral
 ```
 
-The web app runs on `http://localhost:3000`; the API runs on `http://localhost:8000`.
+## Environment
 
-Routes:
+Minimum useful environment:
 
-- `/` landing page
-- `/auth` Supabase sign-in/sign-up
-- `/workspace` authenticated RAG workspace
-- `/api/status` frontend proxy for API health and corpus counts
+```env
+LOCAL_API_KEY=local-dev-key
+DATABASE_URL=postgresql://rag:rag@localhost:5432/rag
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=mistral
+LLAVA_MODEL=llava
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+TEE_MODE=none
+SEALED_STORAGE_DIR=sealed
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+REQUIRE_SUPABASE_JWT=false
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
-Auth notes:
+For hosted LLM fallback, use an OpenAI-compatible provider:
 
-- Password sign-in/sign-up uses the Supabase browser client.
-- If Supabase email confirmation is enabled, sign-up will ask the user to confirm email before workspace access.
-- `/workspace` checks the browser session and redirects back to `/auth` when unauthenticated.
+```env
+HOSTED_LLM_BASE_URL=https://api.groq.com/openai/v1
+HOSTED_LLM_API_KEY=your-provider-key
+OLLAMA_MODEL=llama-3.1-8b-instant
+```
 
-Backend API:
+## API Surface
 
-- `GET /health`
-- `GET /status`
-- `POST /ingest`
-- `POST /query`
-- `POST /verify`
+```text
+GET  /health
+GET  /status
+POST /ingest
+GET  /ingest/jobs/{job_id}
+POST /query
+POST /verify
+```
 
-## Important Security Note
+Frontend proxy routes:
 
-`TEE_MODE=none` is development mode. Current attestation receipts are placeholders so product work can proceed. Do not claim hardware-backed privacy until the NearAI attestation and sealed-storage adapter replaces `services/api/app/security/attestation.py`.
+```text
+/api/status
+/api/ingest
+/api/ingest/jobs/[jobId]
+/api/query
+/api/verify
+```
 
-## Next Milestones
+## Deployment Notes
 
-- Replace local placeholder attestation with NearAI TEE certificate verification.
-- Add background ingestion jobs and progress events.
-- Add LLaVA image captioning and OCR pipeline.
-- Add authentication beyond the local API key before multi-user deployment.
-- Add evaluation benchmarks for retrieval precision@5 and latency.
+Recommended free/manual split:
+
+- Frontend: Vercel, root directory `apps/web`
+- Backend: Render Python service, root directory `services/api`
+- Database/auth: Supabase with pgvector enabled
+- Hosted LLM: Groq or another OpenAI-compatible endpoint
+
+Render backend commands:
+
+```text
+Build Command: pip install -r requirements.txt
+Start Command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Set Vercel API variables to the deployed backend URL:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://your-api.onrender.com
+INTERNAL_API_BASE_URL=https://your-api.onrender.com
+LOCAL_API_KEY=local-dev-key
+```
+
+

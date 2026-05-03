@@ -640,13 +640,13 @@ input:disabled {
 .brand-logo-link {
   align-items: center;
   display: flex;
-  height: 82px;
+  height: 104px;
   justify-content: center;
   margin-bottom: 40px;
   overflow: hidden;
   text-decoration: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  width: 148px;
+  width: 188px;
 }
 
 .brand-logo-link:hover {
@@ -666,9 +666,9 @@ input:disabled {
 }
 
 .login-brand {
-  height: 102px;
+  height: 128px;
   margin-bottom: 24px;
-  width: 184px;
+  width: 230px;
 }
 
 .sidebar-nav {
